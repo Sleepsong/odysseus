@@ -65,8 +65,7 @@ services:
       - ANONYMIZED_TELEMETRY=FALSE
     restart: unless-stopped
 
-  searxng:
-    # Safely pinned tag to avoid upstream crashes
+searxng:
     image: docker.io/searxng/searxng:2026.5.31-7159b8aed
     deploy:
       placement:
@@ -82,18 +81,21 @@ services:
           if [ -z "$$secret" ]; then
             secret="$$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
           fi
-          sed "s|__SEARXNG_SECRET__|$$secret|g" /tmp/searxng-settings.yml.template > /etc/searxng/settings.yml
+          # Fallback to generating a blank configuration structure if template isn't mapped
+          if [ ! -f /tmp/searxng-settings.yml.template ]; then
+             echo "use_default_settings: true" > /etc/searxng/settings.yml
+             echo "server:" >> /etc/searxng/settings.yml
+             echo "  secret_key: \"$$secret\"" >> /etc/searxng/settings.yml
+          fi
         fi
         exec /usr/local/searxng/entrypoint.sh
     ports:
       - "127.0.0.1:8085:8080"
     volumes:
-      - /opt/odysseus/config/searxng:/etc/searxng
-      - /opt/odysseus/config/searxng/settings.yml:/tmp/searxng-settings.yml.template:ro
+      - searxng-data:/etc/searxng
     environment:
       - SEARXNG_BASE_URL=http://localhost:8080/
       - SEARXNG_SECRET=${SEARXNG_SECRET:-}
-    # Required for the SearXNG entrypoint to function properly
     cap_drop:
       - ALL
     cap_add:
