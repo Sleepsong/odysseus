@@ -6,14 +6,12 @@ services:
         constraints:
           - node.role == manager
     ports:
-      # Bound to 0.0.0.0 by default to ensure it remains accessible from your phone/LAN
       - "${APP_BIND:-0.0.0.0}:${APP_PORT:-7000}:7000"
     volumes:
       - /opt/odysseus/data:/app/data
       - /opt/odysseus/logs:/app/logs
       - /opt/odysseus/data/ssh:/app/.ssh
       - /mnt/nas/huggingface/models:/app/.cache/huggingface
-      # Required for persistence of Cookbook CLI model engines
       - /opt/odysseus/data/local:/app/.local
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -65,7 +63,7 @@ services:
       - ANONYMIZED_TELEMETRY=FALSE
     restart: unless-stopped
 
-searxng:
+  searxng:
     image: docker.io/searxng/searxng:2026.5.31-7159b8aed
     deploy:
       placement:
@@ -81,7 +79,6 @@ searxng:
           if [ -z "$$secret" ]; then
             secret="$$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
           fi
-          # Fallback to generating a blank configuration structure if template isn't mapped
           if [ ! -f /tmp/searxng-settings.yml.template ]; then
              echo "use_default_settings: true" > /etc/searxng/settings.yml
              echo "server:" >> /etc/searxng/settings.yml
