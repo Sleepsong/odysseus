@@ -51,10 +51,8 @@ services:
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
     depends_on:
-      searxng:
-        condition: service_healthy
-      chromadb:
-        condition: service_started
+      - searxng
+      - chromadb
     restart: unless-stopped
 
   chromadb:
