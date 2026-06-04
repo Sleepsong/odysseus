@@ -123,5 +123,6 @@ searxng:
     restart: unless-stopped
 
 volumes:
+  searxng-data:
   chromadb-data:
   ntfy-cache:
