@@ -62,6 +62,10 @@ services:
     environment:
       - ANONYMIZED_TELEMETRY=FALSE
     restart: unless-stopped
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   searxng:
     image: docker.io/searxng/searxng:2026.5.31-7159b8aed
@@ -118,6 +122,10 @@ services:
     environment:
       - NTFY_BASE_URL=${NTFY_BASE_URL:-http://localhost:8091}
     restart: unless-stopped
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
 volumes:
   searxng-data:
